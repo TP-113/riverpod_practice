@@ -234,3 +234,129 @@ bool isCounterEven(Ref ref) {
 
 - Class-based provider では `state` プロパティを使って状態を更新します
 - Provider では `ref.watch()` で他の Provider の値を取得できます
+
+### ref.read/watch について
+
+Riverpod では、Provider の値を取得するために `ref.read()` と `ref.watch()` という2つのメソッドを使います。これらは似ているようで、重要な違いがあります。
+
+#### ref.watch
+
+`ref.watch()` は Provider の値を取得し、その Provider の値が変更されたときに**自動的に再ビルド**をトリガーします。
+
+```dart
+// Widget内での使用例
+class MyWidget extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // counterControllerProviderの値を監視
+    final counter = ref.watch(counterControllerProvider);
+    
+    return Text('Counter: $counter');
+    // カウンターが変更されるたびに、このWidgetが再ビルドされる
+  }
+}
+
+// Provider内での使用例
+@riverpod
+String counterDisplay(Ref ref) {
+  // 他のProviderの値を監視
+  final counter = ref.watch(counterControllerProvider);
+  return 'The count is $counter';
+  // counterControllerProviderが変わると、このProviderも再計算される
+}
+```
+
+**ref.watch の特徴：**
+- リアクティブ：監視している Provider の値が変わると自動的に再実行される
+- Widget の build メソッド内で使用する
+- Provider の中で他の Provider を参照する際に使用する
+
+#### ref.read
+
+`ref.read()` は Provider の値を一度だけ取得します。値が変更されても再ビルドは**トリガーされません**。
+
+```dart
+class MyWidget extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ElevatedButton(
+      onPressed: () {
+        // ボタンが押されたときに一度だけ値を取得
+        final controller = ref.read(counterControllerProvider.notifier);
+        controller.increment();
+      },
+      child: Text('Increment'),
+    );
+  }
+}
+```
+
+**ref.read の特徴：**
+- 非リアクティブ：値の変更を監視しない
+- イベントハンドラ（onPressed、onTap など）内で使用する
+- 一度だけ値を取得したい場合に使用する
+
+#### 使い分けのルール
+
+**ref.watch を使う場面：**
+- Widget の build メソッド内で Provider の値を表示する
+- Provider 内で他の Provider の値に依存した計算をする
+- 値の変化に応じて UI を更新したい
+
+**ref.read を使う場面：**
+- ボタンのクリックなどのイベントハンドラ内
+- initState などのライフサイクルメソッド内
+- 値の変化を監視する必要がない一時的な処理
+
+#### よくある間違い
+
+```dart
+// ❌ 間違い：build内でref.readを使う
+class BadExample extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final counter = ref.read(counterControllerProvider); // ❌
+    return Text('$counter');
+    // カウンターが変わってもUIが更新されない！
+  }
+}
+
+// ✅ 正解：build内ではref.watchを使う
+class GoodExample extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final counter = ref.watch(counterControllerProvider); // ✅
+    return Text('$counter');
+    // カウンターが変わるとUIが自動更新される
+  }
+}
+```
+
+```dart
+// ❌ 間違い：イベントハンドラ内でref.watchを使う
+onPressed: () {
+  final counter = ref.watch(counterControllerProvider); // ❌
+  // 不要な依存関係が作られる
+}
+
+// ✅ 正解：イベントハンドラ内ではref.readを使う
+onPressed: () {
+  final counter = ref.read(counterControllerProvider); // ✅
+  // 値を一度だけ取得
+}
+```
+
+#### .notifier の使い方
+
+Class-based Provider のメソッドを呼びたい場合は、`.notifier` を付けてコントローラーのインスタンスを取得します：
+
+```dart
+// Providerの値を取得
+final counterValue = ref.watch(counterControllerProvider);
+
+// コントローラーのインスタンスを取得してメソッドを呼ぶ
+final controller = ref.read(counterControllerProvider.notifier);
+controller.increment();
+```
+
+**重要：** メソッドを呼ぶ場合は通常 `ref.read` を使います。`ref.watch` でコントローラーを監視する必要はありません。
