@@ -116,36 +116,121 @@ int doubledMyNumber(Ref ref){
 
 上記の myNumber と doubledMyNumber を定義し、アプリ画面の「My number : xxx」の箇所に表示しましょう。
 
+@riverpod をつけてメソッドを実装した後、以下のコマンドでコードを生成してください：
+
+```bash
+dart run build_runner build -d
+```
+
 ### Provider の種類
 
 Provider は**class-based provider**と**functional provider**の二種類に分けられます。
 
 参照（Riverpod 公式ドキュメント） → https://riverpod.dev/ja/docs/concepts/about_code_generation#provider-%E3%81%AE%E5%AE%9A%E7%BE%A9
 
-- class-based provider
-  - 関数で副作用を実行できる Provider
-- functional provider
-  - 副作用を実行できない Provider
+#### Functional Provider
 
-前の節で紹介したのは functional provider です。
-
-実際には、これらの Provider は以下のように定義できます。
+functional provider は、純粋な関数として定義される Provider です。副作用（API 呼び出し、ファイル書き込みなど）を持たず、入力に対して常に同じ出力を返します。
 
 ```dart
 @riverpod
-// class-based provider
+int myNumber(Ref ref) {
+  return 100;  // 固定値を返す
+}
+
+@riverpod
+int doubledCount(Ref ref) {
+  final count = ref.watch(counterControllerProvider);
+  return count * 2;  // 他のProviderの値を加工して返す
+}
+```
+
+特徴：
+
+- 計算結果や加工したデータを提供するのに適している
+- 状態を直接変更することはできない（読み取り専用）
+
+#### Class-based Provider
+
+class-based provider は、クラスとして定義される Provider です。内部に状態を持ち、その状態を変更するメソッドを定義できます。
+
+```dart
+@riverpod
+class CounterController extends _$CounterController {
+  @override
+  int build() => 0;  // 初期値を返す
+
+  // 状態を変更するメソッド（副作用）
+  void increment() {
+    state++;  // stateプロパティで状態を更新
+  }
+
+  void reset() {
+    state = 0;
+  }
+}
+```
+
+build()で返した値が初期値となり、これが state 変数に格納されます。定義したメソッドで state 変数に新しい値を代入すると、Provider の値が更新されます。state 変数は Riverpod がコード生成で定義している変数なので、変数名は state で固定です。
+
+特徴：
+
+- 状態を保持し、変更できる
+- 外部（ボタンタップなど）からのアクションに対応する処理を実装できる
+
+#### どちらを使うべきか？
+
+使い分けの指針：
+
+**Functional Provider を使う場面：**
+
+- 他の Provider の値を計算・加工するだけの場合
+- 純粋な計算ロジックを実装する場合
+- 複数の Provider の値を組み合わせた状態を定義したい場合
+
+**Class-based Provider を使う場面：**
+
+- ユーザーの操作に応じて状態を変更する必要がある場合
+- メソッドで状態を操作する必要がある場合
+
+実際のアプリケーションでは、これらを組み合わせて使用します：
+
+```dart
+// Class-based: カウンターの状態管理
+@riverpod
 class CounterController extends _$CounterController {
   @override
   int build() => 0;
 
   void increment() {
-    state++;
+    return state++;
   }
 }
 
+// Functional: カウンターの値を加工してStringを返す
 @riverpod
-// functional provider
-int doubledCount(Ref ref) {
-  return ref.watch(counterControllerProvider) * 2;
+String counterMessage(Ref ref) {
+  final count = ref.watch(counterControllerProvider);
+  return 'Current count: $count';
+}
+
+// Functional: 与えられたintが偶数かどうか判定してboolを返す
+@riverpod
+bool isCounterEven(Ref ref) {
+  final count = ref.watch(counterControllerProvider);
+  return count % 2 == 0;
 }
 ```
+
+**_▫️ 練習問題_**
+
+`lib/controller/counter_controller.dart` に以下の機能を追加してください：
+
+1. `CounterController` クラスに `decrement()` メソッドを追加し、カウンターを減らす機能を実装する
+2. カウンターの値を 3 倍にする functional provider `tripledCount` を作成し、"Tripled Count :"の部分に表示する
+3. カウンターが 10 以上かどうかを判定する functional provider `isCounterOverTen` を作成し、"Is counter over 10? : "の部分に表示する
+
+ヒント：
+
+- Class-based provider では `state` プロパティを使って状態を更新します
+- Provider では `ref.watch()` で他の Provider の値を取得できます

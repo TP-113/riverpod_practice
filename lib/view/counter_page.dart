@@ -18,14 +18,28 @@ class CounterPage extends ConsumerWidget {
           children: [
             Text('My number : xxx'),
             SizedBox(height: 120),
-            Text('Hello! This is a counter app.'),
             Text('Count: ${ref.watch(counterControllerProvider)}'),
-            ElevatedButton(
-              onPressed: () {
-                ref.read(counterControllerProvider.notifier).increment();
-              },
-              child: const Text('Increment'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: 18,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    ref.read(counterControllerProvider.notifier).increment();
+                  },
+                  child: const Text('+1'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    // ここにdecrement処理を追加
+                  },
+                  child: const Text('-1'),
+                ),
+              ],
             ),
+            SizedBox(height: 60),
+            Text('Tripled count: xxx'),
+            Text('Is counter over 10? : xxx'),
           ],
         ),
       ),
