@@ -88,7 +88,7 @@ Riverpod は以下のような課題を解決してくれます。
 
 Riverpod では、**Provider**を定義し、`ref.read/watch` で状態を取得します。
 
-### Pvovider の基本
+### Provider の基本
 
 Provider を定義する方法を説明します。Provider は状態変数を保持できます。
 
@@ -111,6 +111,31 @@ int doubledMyNumber(Ref ref){
 ```
 
 この Provider では、myNumber の値を 2 倍して返します。よって、この Provider が保持する値は 200 になります。
+
+### Widget から Provider を利用する
+
+Provider の値を Widget で使用するには、通常の `StatelessWidget` ではなく `ConsumerWidget` を継承する必要があります。`ConsumerWidget` を使うことで、`build` メソッドに `WidgetRef ref` パラメータが追加され、これを通じて Provider にアクセスできるようになります。
+
+```dart
+// ❌ 通常のStatelessWidgetではProviderを使えない
+class MyWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final number = ref.watch(myNumberProvider); //refが存在しないので、この行でエラーになる
+    return Text('Number: $number');
+  }
+}
+
+// ✅ ConsumerWidgetを使うとProviderにアクセスできる
+class MyWidget extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // ref.watch() でProviderの値を取得
+    final number = ref.watch(myNumberProvider);
+    return Text('Number: $number');
+  }
+}
+```
 
 **_▫️ 練習問題_**
 
@@ -237,7 +262,7 @@ bool isCounterEven(Ref ref) {
 
 ### ref.read/watch について
 
-Riverpod では、Provider の値を取得するために `ref.read()` と `ref.watch()` という2つのメソッドを使います。これらは似ているようで、重要な違いがあります。
+Riverpod では、Provider の値を取得するために `ref.read()` と `ref.watch()` という 2 つのメソッドを使います。これらは似ているようで、重要な違いがあります。
 
 #### ref.watch
 
@@ -250,7 +275,7 @@ class MyWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // counterControllerProviderの値を監視
     final counter = ref.watch(counterControllerProvider);
-    
+
     return Text('Counter: $counter');
     // カウンターが変更されるたびに、このWidgetが再ビルドされる
   }
@@ -267,6 +292,7 @@ String counterDisplay(Ref ref) {
 ```
 
 **ref.watch の特徴：**
+
 - リアクティブ：監視している Provider の値が変わると自動的に再実行される
 - Widget の build メソッド内で使用する
 - Provider の中で他の Provider を参照する際に使用する
@@ -282,16 +308,16 @@ class MyWidget extends ConsumerWidget {
     return ElevatedButton(
       onPressed: () {
         // ボタンが押されたときに一度だけ値を取得
-        final controller = ref.read(counterControllerProvider.notifier);
-        controller.increment();
+        print("Count : ${ref.read(counterControllerProvider)}"); // コンソールに"Count : 1"のように表示される
       },
-      child: Text('Increment'),
+      child: Text('Push'),
     );
   }
 }
 ```
 
 **ref.read の特徴：**
+
 - 非リアクティブ：値の変更を監視しない
 - イベントハンドラ（onPressed、onTap など）内で使用する
 - 一度だけ値を取得したい場合に使用する
@@ -299,11 +325,13 @@ class MyWidget extends ConsumerWidget {
 #### 使い分けのルール
 
 **ref.watch を使う場面：**
+
 - Widget の build メソッド内で Provider の値を表示する
 - Provider 内で他の Provider の値に依存した計算をする
-- 値の変化に応じて UI を更新したい
+- 値の変化に応じて UI や他の Provider を更新したい
 
 **ref.read を使う場面：**
+
 - ボタンのクリックなどのイベントハンドラ内
 - initState などのライフサイクルメソッド内
 - 値の変化を監視する必要がない一時的な処理
@@ -360,3 +388,177 @@ controller.increment();
 ```
 
 **重要：** メソッドを呼ぶ場合は通常 `ref.read` を使います。`ref.watch` でコントローラーを監視する必要はありません。
+
+### Future/StreamProvider - 非同期処理の扱い方
+
+Riverpod では、非同期処理（API 呼び出し、データベース操作など）を扱うための専用の Provider があります。
+
+#### FutureProvider
+
+`FutureProvider` は非同期処理の結果を提供する Provider です。API からデータを取得する場合などに使用します。
+
+```dart
+// APIからユーザー情報を取得する例
+@riverpod
+Future<User> fetchUser(Ref ref) async {
+  final userId = ref.watch(userIdProvider);
+  final response = await http.get(
+    Uri.parse('https://api.example.com/users/$userId'),
+  );
+
+  if (response.statusCode == 200) {
+    return User.fromJson(json.decode(response.body));
+  } else {
+    throw Exception('Failed to load user');
+  }
+}
+```
+
+**Widget から使用する方法：**
+
+FutureProvider の値を ref.read/watch で取得すると、AsyncValue という型で返ってきます。AsyncValue は Value, Loading, Error という 3 つの状態を持ちます。Widget ではこれらの状態ごとの処理を実装しておきます。
+
+```dart
+class UserProfileWidget extends ConsumerWidget {
+  const UserProfileWidget();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // AsyncValueで非同期データを扱う
+    final userAsync = ref.watch(fetchUserProvider);
+
+    // switch式でパターンマッチング
+    return switch (userAsync) {
+      AsyncData(:final value) => Text('Hello, ${value.name}!'),
+      AsyncLoading() => CircularProgressIndicator(),
+      AsyncError(:final error) => Text('Error: $error'),
+    };
+  }
+}
+```
+
+**他の Provider から利用する場合 :**
+
+FutureProvider の値を普通に ref.read/watch すると AsyncValue が返ってきてしまいます。`ref.watch(provider.future)`のように、`.future` をつけることで、Provider が扱っている Future をそのまま取得することができます。
+
+Provider でも AsyncValue で受け取ることは可能ですが、コードが煩雑になるため、FutureProvider の値を他の Provider で受け取る場合には`.future`を使って Future のまま処理する方がおすすめです。
+
+```dart
+// 別のFutureProviderから値を取得する例
+@riverpod
+Future<String> userGreeting(Ref ref) async {
+  // .futureを使ってFutureのまま処理
+  final user = await ref.watch(fetchUserProvider.future);
+  return 'Welcome, ${user.name}!';
+}
+
+// 複数のFutureProviderを組み合わせる例
+@riverpod
+Future<UserProfile> completeUserProfile(Ref ref) async {
+  // 複数のFutureProviderから値を取得
+  final user = await ref.watch(fetchUserProvider.future);
+  final posts = await ref.watch(fetchUserPostsProvider(user.id).future);
+  final stats = await ref.watch(fetchUserStatsProvider(user.id).future);
+  
+  return UserProfile(
+    user: user,
+    posts: posts,
+    statistics: stats,
+  );
+}
+```
+
+#### StreamProvider
+
+`StreamProvider` はリアルタイムでデータを配信する Provider です。WebSocket 接続や Firestore のリアルタイムデータなどに使用します。
+これも`Future Provider`と同様に `AsyncValue` を返します。
+
+```dart
+// 1秒ごとにカウントアップするストリームの例
+@riverpod
+Stream<int> counterStream(Ref ref) async* {
+  int count = 0;
+  while (true) {
+    yield count++;
+    await Future.delayed(Duration(seconds: 1));
+  }
+}
+
+// Firestoreからリアルタイムでメッセージを取得する例
+@riverpod
+Stream<List<Message>> chatMessages(Ref ref) {
+  return FirebaseFirestore.instance
+      .collection('messages')
+      .orderBy('timestamp', descending: true)
+      .snapshots()
+      .map((snapshot) => snapshot.docs
+          .map((doc) => Message.fromFirestore(doc))
+          .toList());
+}
+```
+
+#### AsyncValue の詳細
+
+`AsyncValue` は非同期データの状態を表現するクラスです。3 つの状態を持ちます：
+
+1. **AsyncLoading**: データ読み込み中
+2. **AsyncData**: データ取得成功
+3. **AsyncError**: エラー発生
+
+**パターンマッチングでの処理：**
+
+```dart
+// switch式を使った処理
+final widget = switch (userAsync) {
+  AsyncData(:final value) => UserCard(user: value),
+  AsyncLoading() => LoadingSpinner(),
+  AsyncError(:final error) => ErrorMessage(error: error),
+};
+```
+
+#### Class-based の非同期 Provider
+
+Class-based Provider でも非同期処理を扱えます：
+
+```dart
+@riverpod
+class UserController extends _$UserController {
+  @override
+  Future<User?> build() async { //buildの戻り値をFutureにすることで、FutureProviderになる
+    // 初期データの取得
+    return await _fetchCurrentUser();
+  }
+
+  Future<void> updateProfile(String name) async {
+    // ローディング状態にする
+    state = const AsyncLoading();
+
+    try {
+      final updatedUser = await _updateUserAPI(name);
+      // 成功時、新しいデータで更新
+      state = AsyncData(updatedUser);
+    } catch (error, stackTrace) {
+      // エラー時
+      state = AsyncError(error, stackTrace);
+    }
+  }
+
+  Future<User?> _fetchCurrentUser() async {
+    // API呼び出しなど
+  }
+
+  Future<User> _updateUserAPI(String name) async {
+    // API呼び出しなど
+  }
+}
+```
+
+**_▫️ 練習問題_**
+
+カウンターアプリに遅延処理を実装します。TripledCount の値について、カウントの変化から 3 秒遅れで表示されるようにしましょう。
+
+ヒント：
+
+- TripledCount の Provider を FutureProvider にする
+- `await Future.delayed()` を使って遅延を実装
+- `swtich`式で FutureProvider の状態（AsyncValue）ごとに処理を分ける
