@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_practice/controller/counter_controller.dart';
 
 class CounterPage extends ConsumerWidget {
   const CounterPage({super.key});
@@ -15,8 +16,16 @@ class CounterPage extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Text('My number : xxx'),
+            SizedBox(height: 120),
             Text('Hello! This is a counter app.'),
-            TextButton(onPressed: () {}, child: const Text('Increment')),
+            Text('Count: ${ref.watch(counterControllerProvider)}'),
+            ElevatedButton(
+              onPressed: () {
+                ref.read(counterControllerProvider.notifier).increment();
+              },
+              child: const Text('Increment'),
+            ),
           ],
         ),
       ),

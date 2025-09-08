@@ -1,9 +1,21 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'counter_controller.g.dart';
 
 @riverpod
+/// class-based provider
 class CounterController extends _$CounterController {
   @override
   int build() => 0;
+
+  void increment() {
+    state++;
+  }
+}
+
+@riverpod
+/// functionnal provider
+int doubledCount(Ref ref) {
+  return ref.watch(counterControllerProvider) * 2;
 }
