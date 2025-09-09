@@ -1,24 +1,25 @@
 # Riverpod について学ぼう
 
-ゴール: スニダンで使用している状態管理フレームワーク：Riverpod について理解できる
+【ゴール】スニダンで使用している状態管理フレームワーク：[Riverpod](https://riverpod.dev/ja/) について理解できる
 
 - Riverpod の主要なインターフェースを理解する
   - Provider
-  - [ref.watch](http://ref.watch)/read
+  - ref.read/watch
 - Riverpod の Generator 機能を使って、Provider を生成できる
+- Provider の値を Widget から参照して利用できる
 
 # 状態管理とは
 
-アプリケーションにおける「状態（State）」とは、アプリケーションが保持する動的なデータのことです。
+アプリケーションにおける「状態（State）」とは、アプリケーションが保持する動的なデータのことです。この状態をいかに管理するかということがアプリケーションを作る上で重要になります。
 
-状態管理の例)
+状態管理の例）
 
 - ユーザーの入力内容（テキストフィールドの値、チェックボックスの状態など）
 - API から取得したデータ（ユーザー情報、商品リストなど）
 - UI の表示状態（ローディング中、エラー表示、タブの選択状態など）
 - アプリ全体の設定（ダークモード、言語設定など）
 
-これらの状態は時間とともに変化し、その変化に応じて UI を更新する必要があります。
+これらの状態は随時変化し、その変化に応じて UI を更新する必要があります。
 
 ## なぜ状態管理が必要なのか
 
@@ -73,14 +74,14 @@ Riverpod は、Flutter の状態管理・画面反映まわりの処理につい
 Riverpod は以下のような課題を解決してくれます。
 
 - 状態管理のための変数・インスタンスを楽に管理したい
-- 状態更新時に、他の状態にも更新を伝播させたい
+- ある状態の更新時に、他の状態にも更新を伝播させたい
 - 状態を更新したら画面に勝手に反映されてほしい
 - クラスの利用シーンに応じて、柔軟に依存関係を注入したい（テストなど、別のコンテキストでの実行時）
 
 これらを実現するために、Riverpod では以下のような機能が実装されています。
 
 - 各種の Provider による状態管理
-- `ref.read`/ `ref.watch` による依存関係の注入（状態値の取得）
+- `ref.read`/ `ref.watch` による状態値の取得（および依存関係の注入）
 - 状態値のキャッシュ
 - 状態の変化を Widget に自動的に反映する
 
@@ -90,7 +91,7 @@ Riverpod では、**Provider**を定義し、`ref.read/watch` で状態を取得
 
 ### Provider の基本
 
-Provider を定義する方法を説明します。Provider は状態変数を保持できます。
+Provider を定義する方法を説明します。Provider は状態変数を保持（キャッシュ）できます。
 
 ```dart
 @riverpod
@@ -99,7 +100,7 @@ int myNumber(Ref ref){
 }
 ```
 
-これが、最も基本的な Provider の定義になります。この Provider は、100 という整数を保持します。
+これが、最も基本的な Provider の定義になります。この Provider は、`100` という整数を保持します。
 
 Provider 同士は接続できます。他の Provider の値を使って、新しい Provider を定義することができます。他の Provider の値を取得するには、`ref.watch()`を使用します。
 
@@ -110,7 +111,7 @@ int doubledMyNumber(Ref ref){
 }
 ```
 
-この Provider では、myNumber の値を 2 倍して返します。よって、この Provider が保持する値は 200 になります。
+この Provider では、myNumber の値を 2 倍して返します。よって、この Provider が保持する値は `200` になります。
 
 ### Widget から Provider を利用する
 
@@ -630,78 +631,8 @@ Future<User> fetchUser(Ref ref) async {
 Generator を使わない方法も完全に有効ですが、以下の理由から **Generator の使用が推奨されています**：
 
 1. **コードがシンプル**: Provider の型を明示的に指定する必要がなく、コードが簡潔になります
-2. **パラメータ対応**: Family Provider（パラメータ付き Provider）の実装が簡単最後におまけとして、
-
-## おまけ：Generator を使わない Provider 定義
-
-これまでの講義では、`@riverpod` アノテーションと Riverpod Generator を使って Provider を定義してきました。実は、Generator を使わずに Provider を定義することも可能です。
-
-### 手動での Provider 定義
-
-Generator を使わない場合、以下のように Provider を定義します：
-
-```dart
-// Generatorなしでの定義（従来の方法）
-final myNumberProvider = Provider<int>((ref) {
-  return 100;
-});
-
-// StateNotifierProviderの例
-class CounterNotifier extends StateNotifier<int> {
-  CounterNotifier() : super(0);
-
-  void increment() {
-    state++;
-  }
-}
-
-final counterProvider = StateNotifierProvider<CounterNotifier, int>((ref) {
-  return CounterNotifier();
-});
-
-// FutureProviderの例
-final fetchUserProvider = FutureProvider<User>((ref) async {
-  final response = await http.get(Uri.parse('...'));
-  return User.fromJson(json.decode(response.body));
-});
-```
-
-### Generator を使った場合との比較
-
-同じ機能を Generator を使って実装すると：
-
-```dart
-// Generatorを使った定義（推奨）
-@riverpod
-int myNumber(Ref ref) {
-  return 100;
-}
-
-@riverpod
-class Counter extends _$Counter {
-  @override
-  int build() => 0;
-
-  void increment() {
-    state++;
-  }
-}
-
-@riverpod
-Future<User> fetchUser(Ref ref) async {
-  final response = await http.get(Uri.parse('...'));
-  return User.fromJson(json.decode(response.body));
-}
-```
-
-### なぜ Generator を使うべきか
-
-Generator を使わない方法も完全に有効ですが、以下の理由から **Generator の使用が推奨されています**：
-
-1. **コードがシンプル**: Provider の型を明示的に指定する必要がなく、コードが簡潔になります
-2. **型安全性**: コンパイル時に型チェックが行われ、エラーを早期に発見できます
-3. **パラメータ対応**: Family Provider（パラメータ付き Provider）の実装が簡単です
-4. **公式推奨**: Riverpod 公式ドキュメントでも Generator の使用が推奨されています
+2. **パラメータ対応**: Family Provider（パラメータ付き Provider）の実装が簡単です
+3. **公式推奨**: Riverpod 公式ドキュメントでも Generator の使用が推奨されています
 
 ```dart
 // パラメータ付きProviderの比較
@@ -718,8 +649,6 @@ User user(Ref ref, String userId) {
 }
 ```
 
-### まとめ
-
 Generator を使わない方法を知っておくことは、既存のコードを理解する上で役立ちます。しかし、新しくコードを書く場合は、**Generator を使用することを強く推奨します**。
 
 Generator を使うことで：
@@ -730,3 +659,21 @@ Generator を使うことで：
 - チーム開発での一貫性を保てる
 
 この講義で学んだ Generator ベースの書き方を実践で活用していきましょう！
+
+# まとめ
+
+この講義では、Riverpod の基本的な使い方について学びました。最後にキーワードをまとめておきましょう。
+
+- Provider の作成方法
+  - Functional / Class-based Provider
+- ref.read/watch の使い分け
+- Future/Stream Provider
+  - AsyncValue
+
+これらの機能を活用すれば、単純なアプリの作成は始められます！
+
+Riverpod の発展的な機能として以下のものがあります。さらに Riverpod について学びたい方は、以下のキーワードを[公式ドキュメント](https://riverpod.dev/ja/docs/introduction/getting_started)で検索してみましょう。
+
+- **Family** : 初期の引数を与えつつ Provider を生成する機能
+- **Consumer**：ConsumerWidget とは違う方法で Widget から Provider の状態を取得する方法
+- **Provider** Overrides：実行環境で使用する Provider を選択（上書き）する方法。主にテストを書く際によく使います
