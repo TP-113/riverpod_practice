@@ -459,7 +459,7 @@ Future<UserProfile> completeUserProfile(Ref ref) async {
   final user = await ref.watch(fetchUserProvider.future);
   final posts = await ref.watch(fetchUserPostsProvider(user.id).future);
   final stats = await ref.watch(fetchUserStatsProvider(user.id).future);
-  
+
   return UserProfile(
     user: user,
     posts: posts,
@@ -562,3 +562,171 @@ class UserController extends _$UserController {
 - TripledCount の Provider を FutureProvider にする
 - `await Future.delayed()` を使って遅延を実装
 - `swtich`式で FutureProvider の状態（AsyncValue）ごとに処理を分ける
+
+## おまけ：Generator を使わない Provider 定義
+
+これまでの講義では、`@riverpod` アノテーションと Riverpod Generator を使って Provider を定義してきました。実は、Generator を使わずに Provider を定義することも可能です。
+
+### 手動での Provider 定義
+
+Generator を使わない場合、以下のように Provider を定義します：
+
+```dart
+// Generatorなしでの定義（従来の方法）
+final myNumberProvider = Provider<int>((ref) {
+  return 100;
+});
+
+// StateNotifierProviderの例
+class CounterNotifier extends StateNotifier<int> {
+  CounterNotifier() : super(0);
+
+  void increment() {
+    state++;
+  }
+}
+
+final counterProvider = StateNotifierProvider<CounterNotifier, int>((ref) {
+  return CounterNotifier();
+});
+
+// FutureProviderの例
+final fetchUserProvider = FutureProvider<User>((ref) async {
+  final response = await http.get(Uri.parse('...'));
+  return User.fromJson(json.decode(response.body));
+});
+```
+
+### Generator を使った場合との比較
+
+同じ機能を Generator を使って実装すると：
+
+```dart
+// Generatorを使った定義（推奨）
+@riverpod
+int myNumber(Ref ref) {
+  return 100;
+}
+
+@riverpod
+class Counter extends _$Counter {
+  @override
+  int build() => 0;
+
+  void increment() {
+    state++;
+  }
+}
+
+@riverpod
+Future<User> fetchUser(Ref ref) async {
+  final response = await http.get(Uri.parse('...'));
+  return User.fromJson(json.decode(response.body));
+}
+```
+
+### なぜ Generator を使うべきか
+
+Generator を使わない方法も完全に有効ですが、以下の理由から **Generator の使用が推奨されています**：
+
+1. **コードがシンプル**: Provider の型を明示的に指定する必要がなく、コードが簡潔になります
+2. **パラメータ対応**: Family Provider（パラメータ付き Provider）の実装が簡単最後におまけとして、
+
+## おまけ：Generator を使わない Provider 定義
+
+これまでの講義では、`@riverpod` アノテーションと Riverpod Generator を使って Provider を定義してきました。実は、Generator を使わずに Provider を定義することも可能です。
+
+### 手動での Provider 定義
+
+Generator を使わない場合、以下のように Provider を定義します：
+
+```dart
+// Generatorなしでの定義（従来の方法）
+final myNumberProvider = Provider<int>((ref) {
+  return 100;
+});
+
+// StateNotifierProviderの例
+class CounterNotifier extends StateNotifier<int> {
+  CounterNotifier() : super(0);
+
+  void increment() {
+    state++;
+  }
+}
+
+final counterProvider = StateNotifierProvider<CounterNotifier, int>((ref) {
+  return CounterNotifier();
+});
+
+// FutureProviderの例
+final fetchUserProvider = FutureProvider<User>((ref) async {
+  final response = await http.get(Uri.parse('...'));
+  return User.fromJson(json.decode(response.body));
+});
+```
+
+### Generator を使った場合との比較
+
+同じ機能を Generator を使って実装すると：
+
+```dart
+// Generatorを使った定義（推奨）
+@riverpod
+int myNumber(Ref ref) {
+  return 100;
+}
+
+@riverpod
+class Counter extends _$Counter {
+  @override
+  int build() => 0;
+
+  void increment() {
+    state++;
+  }
+}
+
+@riverpod
+Future<User> fetchUser(Ref ref) async {
+  final response = await http.get(Uri.parse('...'));
+  return User.fromJson(json.decode(response.body));
+}
+```
+
+### なぜ Generator を使うべきか
+
+Generator を使わない方法も完全に有効ですが、以下の理由から **Generator の使用が推奨されています**：
+
+1. **コードがシンプル**: Provider の型を明示的に指定する必要がなく、コードが簡潔になります
+2. **型安全性**: コンパイル時に型チェックが行われ、エラーを早期に発見できます
+3. **パラメータ対応**: Family Provider（パラメータ付き Provider）の実装が簡単です
+4. **公式推奨**: Riverpod 公式ドキュメントでも Generator の使用が推奨されています
+
+```dart
+// パラメータ付きProviderの比較
+
+// Generatorなし（複雑）
+final userProvider = Provider.family<User, String>((ref, userId) {
+  return fetchUserById(userId);
+});
+
+// Generatorあり（シンプル）
+@riverpod
+User user(Ref ref, String userId) {
+  return fetchUserById(userId);
+}
+```
+
+### まとめ
+
+Generator を使わない方法を知っておくことは、既存のコードを理解する上で役立ちます。しかし、新しくコードを書く場合は、**Generator を使用することを強く推奨します**。
+
+Generator を使うことで：
+
+- コードがより読みやすくなる
+- 開発効率が向上する
+- Riverpod の最新機能を活用できる
+- チーム開発での一貫性を保てる
+
+この講義で学んだ Generator ベースの書き方を実践で活用していきましょう！

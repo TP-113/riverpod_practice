@@ -17,8 +17,10 @@ Flutter における状態管理は、ローカルストレージや API から�
 Riverpod の使い方を、コード例を示しながら説明。
 Riverpod Generator を使った方法を主に説明し、Generator を使わない方法については軽く触れるだけに留める。
 
-class-based provider と functional provider についてそれぞれ説明する。Riverpod Generator を使わなくても Provider を生成できることについても軽く触れる。
+class-based provider と functional provider についてそれぞれ説明する。
 
 ref.read/watch について説明する。ref.watch で取得している Provider の値が変更されたときは、その変更が即座に Widget に反映され、再描画されることを説明する。
 
 Future/StreamProvider について説明する。@riverpod アノテーションをつけた Class やメソッドの戻り値を Future にするだけでこれが実現可能であることを説明する。値を取得するときに AsyncValue になることを説明し、その使い方を解説する。
+
+最後におまけとして、Riverpod Generator を使わなくても Provider を生成できることについても軽く触れる。
