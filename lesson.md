@@ -676,4 +676,4 @@ Riverpod の発展的な機能として以下のものがあります。さら�
 
 - **Family** : 初期の引数を与えつつ Provider を生成する機能
 - **Consumer**：ConsumerWidget とは違う方法で Widget から Provider の状態を取得する方法
-- **Provider** Overrides：実行環境で使用する Provider を選択（上書き）する方法。主にテストを書く際によく使います
+- **Provider Overrides**：実行環境で使用する Provider を選択（上書き）する方法。主にテストを書く際によく使います
