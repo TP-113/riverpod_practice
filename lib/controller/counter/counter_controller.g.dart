@@ -8,7 +8,9 @@ part of 'counter_controller.dart';
 
 String _$doubledCountHash() => r'fae6a4b33edb2a3d79516c4f7e993b0c4f51497d';
 
-/// See also [doubledCount].
+/// functionnal provider
+///
+/// Copied from [doubledCount].
 @ProviderFor(doubledCount)
 final doubledCountProvider = AutoDisposeProvider<int>.internal(
   doubledCount,
@@ -23,9 +25,11 @@ final doubledCountProvider = AutoDisposeProvider<int>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef DoubledCountRef = AutoDisposeProviderRef<int>;
-String _$counterControllerHash() => r'3f1e96160b3558a22868a01812a8a1d08dbe7148';
+String _$counterControllerHash() => r'012b1dc8deec72527014a11b69224b3fcb20053c';
 
-/// See also [CounterController].
+/// class-based provider
+///
+/// Copied from [CounterController].
 @ProviderFor(CounterController)
 final counterControllerProvider =
     AutoDisposeNotifierProvider<CounterController, int>.internal(
