@@ -12,22 +12,22 @@ class HooksPage extends HookWidget {
     final isRunning = useState(false);
     final timer = useRef<Timer?>(null);
 
-    // タイマーの開始/停止制御
+    // 練習問題：Hooks 1 - useEffectを使って開始・停止ボタンでタイマーが起動・停止し、1秒ごとに秒数が更新されるように実装
+    useEffect(() {
+      if (isRunning.value) {
+        // タイマーが開始状態の場合、1秒ごとに秒数を増加
+        timer.value = Timer.periodic(Duration(seconds: 1), (timer) {
+          seconds.value += 1;
+        });
+      } else {
+        // タイマーが停止状態の場合、タイマーをキャンセル
+        timer.value?.cancel();
+      }
 
-    // 課題１：タイマーの開始/停止制御をuseEffectを使って実装してください
-    // ヒント：
-    //  1秒ごとに秒数を足す処理：
-    //    timer.value = Timer.periodic(Duration(seconds: 1), (timer) {
-    //      if (isRunning.value) {
-    //        seconds.value += 1;
-    //      }
-    //    });
-    //  タイマーの停止：
-    //    timer.value?.cancel();
-    //  useEffectの第二引数に変数を与えると、その変数が変化した時にuseEffectの処理が実行されます
+      return null;
+    }, [isRunning.value]); // isRunning.valueが変化した時にuseEffectが実行される
 
     useEffect(() {
-      // Widgetが破棄される時の処理
       return () {
         timer.value?.cancel();
       };
@@ -46,7 +46,11 @@ class HooksPage extends HookWidget {
     }, []);
 
     final resetTimer = useCallback(() {
-      // 課題２：ここに表示時間をリセットする処理を追加
+      // 練習問題：Hooks 2 - resetTimerの中身を実装し、リセットボタンでタイマーの秒数がリセットされるように実装
+      // タイマーを停止
+      isRunning.value = false;
+      // 秒数を0にリセット
+      seconds.value = 0;
     }, []);
 
     return Scaffold(
