@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_practice/controller/my_number_controller.dart';
+import 'package:riverpod_practice/controller/counter/my_number_controller.dart';
 import 'package:riverpod_practice/controller/counter/counter_controller.dart';
 
 class CounterPage extends ConsumerWidget {
