@@ -12,10 +12,25 @@ class CounterController extends _$CounterController {
   void increment() {
     state++;
   }
+
+  void decrement() {
+    state--;
+  }
 }
 
 @riverpod
 /// functionnal provider
 int doubledCount(Ref ref) {
   return ref.watch(counterControllerProvider) * 2;
+}
+
+@riverpod
+Future<int> tripledCount(Ref ref) async {
+  await Future.delayed(const Duration(seconds: 3));
+  return ref.watch(counterControllerProvider) * 3;
+}
+
+@riverpod
+bool isCounterOverTen(Ref ref) {
+  return ref.watch(counterControllerProvider) > 10;
 }

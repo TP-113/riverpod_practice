@@ -25,7 +25,41 @@ final doubledCountProvider = AutoDisposeProvider<int>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef DoubledCountRef = AutoDisposeProviderRef<int>;
-String _$counterControllerHash() => r'012b1dc8deec72527014a11b69224b3fcb20053c';
+String _$tripledCountHash() => r'99d813e2134f6ae2f140ce4c7e5e5146b2559909';
+
+/// See also [tripledCount].
+@ProviderFor(tripledCount)
+final tripledCountProvider = AutoDisposeFutureProvider<int>.internal(
+  tripledCount,
+  name: r'tripledCountProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$tripledCountHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef TripledCountRef = AutoDisposeFutureProviderRef<int>;
+String _$isCounterOverTenHash() => r'b99cffe04a4a43eb9baa864c783017f34bb1b61c';
+
+/// See also [isCounterOverTen].
+@ProviderFor(isCounterOverTen)
+final isCounterOverTenProvider = AutoDisposeProvider<bool>.internal(
+  isCounterOverTen,
+  name: r'isCounterOverTenProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$isCounterOverTenHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef IsCounterOverTenRef = AutoDisposeProviderRef<bool>;
+String _$counterControllerHash() => r'603d7558d5463044e0ac6a6a7798c61973eef372';
 
 /// class-based provider
 ///

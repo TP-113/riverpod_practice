@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../controller/user/user_controller.dart';
 
 class FreezedPage extends ConsumerStatefulWidget {
   const FreezedPage({super.key});
@@ -14,6 +15,19 @@ class _FreezedPageState extends ConsumerState<FreezedPage> {
   DateTime? _selectedBirthDate;
 
   @override
+  void initState() {
+    super.initState();
+    // 練習問題：Freezed 4 - フォームの初期値に現在の情報を挿入
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final user = ref.read(userControllerProvider);
+      setState(() {
+        _nameController.text = user.name;
+        _selectedBirthDate = user.birthDate;
+      });
+    });
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
     super.dispose();
@@ -21,6 +35,9 @@ class _FreezedPageState extends ConsumerState<FreezedPage> {
 
   @override
   Widget build(BuildContext context) {
+    // 練習問題：Freezed 2 - Userを保持するProviderを作成し、画面のユーザー情報部分に表示
+    final user = ref.watch(userControllerProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('ユーザー情報管理'),
@@ -49,11 +66,11 @@ class _FreezedPageState extends ConsumerState<FreezedPage> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                _InfoRow(label: '氏名', value: "xxx", icon: Icons.person),
+                _InfoRow(label: '氏名', value: user.name, icon: Icons.person),
                 const SizedBox(height: 12),
                 _InfoRow(
                   label: '生年月日',
-                  value: DateFormat('yyyy年MM月dd日').format(DateTime(1990, 1, 1)),
+                  value: DateFormat('yyyy年MM月dd日').format(user.birthDate),
                   icon: Icons.cake,
                 ),
                 const SizedBox(height: 12),
@@ -61,7 +78,7 @@ class _FreezedPageState extends ConsumerState<FreezedPage> {
                   label: '更新日',
                   value: DateFormat(
                     'yyyy年MM月dd日 HH:mm',
-                  ).format(DateTime(1990, 1, 1)),
+                  ).format(user.lastUpdated),
                   icon: Icons.update,
                 ),
               ],
@@ -192,7 +209,10 @@ class _FreezedPageState extends ConsumerState<FreezedPage> {
       return;
     }
 
-    // 課題３: ユーザー情報を更新する
+    // 練習問題：Freezed 3 - 更新ボタンの機能を実装
+    ref
+        .read(userControllerProvider.notifier)
+        .updateUser(name: name, birthDate: _selectedBirthDate!);
 
     ScaffoldMessenger.of(
       context,
