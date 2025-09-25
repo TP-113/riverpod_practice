@@ -518,6 +518,7 @@ final widget = switch (userAsync) {
   AsyncData(:final value) => UserCard(user: value),
   AsyncLoading() => LoadingSpinner(),
   AsyncError(:final error) => ErrorMessage(error: error),
+  _ => LoadingSpinner(),
 };
 ```
 
