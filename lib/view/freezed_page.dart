@@ -18,7 +18,10 @@ class _FreezedPageState extends ConsumerState<FreezedPage> {
   void initState() {
     super.initState();
     // 練習問題：Freezed 4 - フォームの初期値に現在の情報を挿入
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // ローカルストレージからユーザー情報を読み込む
+      await ref.read(userControllerProvider.notifier).loadUserFromStorage();
+
       final user = ref.read(userControllerProvider);
       setState(() {
         _nameController.text = user.name;
