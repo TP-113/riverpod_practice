@@ -15,9 +15,8 @@ String _$doubledCountHash() => r'fae6a4b33edb2a3d79516c4f7e993b0c4f51497d';
 final doubledCountProvider = AutoDisposeProvider<int>.internal(
   doubledCount,
   name: r'doubledCountProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$doubledCountHash,
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$doubledCountHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
@@ -32,9 +31,8 @@ String _$tripledCountHash() => r'99d813e2134f6ae2f140ce4c7e5e5146b2559909';
 final tripledCountProvider = AutoDisposeFutureProvider<int>.internal(
   tripledCount,
   name: r'tripledCountProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$tripledCountHash,
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$tripledCountHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
@@ -49,9 +47,10 @@ String _$isCounterOverTenHash() => r'b99cffe04a4a43eb9baa864c783017f34bb1b61c';
 final isCounterOverTenProvider = AutoDisposeProvider<bool>.internal(
   isCounterOverTen,
   name: r'isCounterOverTenProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$isCounterOverTenHash,
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$isCounterOverTenHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
@@ -69,9 +68,10 @@ final counterControllerProvider =
     AutoDisposeNotifierProvider<CounterController, int>.internal(
       CounterController.new,
       name: r'counterControllerProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$counterControllerHash,
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$counterControllerHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
