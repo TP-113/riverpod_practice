@@ -1,16 +1,21 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import '../controller/lap_time/lap_time_controller.dart';
 
-class HooksPage extends HookWidget {
+class HooksPage extends HookConsumerWidget {
   const HooksPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // タイマーの状態管理
     final seconds = useState(0);
     final isRunning = useState(false);
     final timer = useRef<Timer?>(null);
+
+    // ラップタイムの状態管理
+    final lapTimes = ref.watch(lapTimeControllerProvider);
 
     // 練習問題：Hooks 1 - useEffectを使って開始・停止ボタンでタイマーが起動・停止し、1秒ごとに秒数が更新されるように実装
     useEffect(() {
@@ -51,6 +56,13 @@ class HooksPage extends HookWidget {
       isRunning.value = false;
       // 秒数を0にリセット
       seconds.value = 0;
+      // ラップタイムもクリア
+      ref.read(lapTimeControllerProvider.notifier).clearAllLapTimes();
+    }, []);
+
+    // ラップボタンの処理
+    final addLapTime = useCallback(() {
+      ref.read(lapTimeControllerProvider.notifier).addLapTime(seconds.value);
     }, []);
 
     return Scaffold(
@@ -94,7 +106,6 @@ class HooksPage extends HookWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 16),
                   Text(
                     formattedTime,
                     style: TextStyle(
@@ -110,7 +121,7 @@ class HooksPage extends HookWidget {
               ),
             ),
 
-            const SizedBox(height: 40),
+            const SizedBox(height: 16),
 
             // コントロールボタン
             Column(
@@ -141,6 +152,36 @@ class HooksPage extends HookWidget {
                       Text(
                         isRunning.value ? '停止' : '開始',
                         style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // ラップボタン
+                ElevatedButton(
+                  onPressed: addLapTime,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.flag),
+                      SizedBox(width: 8),
+                      Text(
+                        'ラップ',
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -181,9 +222,77 @@ class HooksPage extends HookWidget {
               ],
             ),
 
-            const SizedBox(height: 40),
+            const SizedBox(height: 16),
 
-            const Spacer(),
+            // ラップタイム表示エリア
+            Expanded(
+              child: ListView.builder(
+                itemCount: lapTimes.length,
+                itemBuilder: (context, index) {
+                  final lapTime = lapTimes[index];
+                  final minutes = lapTime.totalSeconds ~/ 60;
+                  final remainingSeconds = lapTime.totalSeconds % 60;
+                  final formattedTime =
+                      '${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
+
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade100,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Center(
+                            child: Text(
+                              '${lapTime.lapNumber}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.orange.shade700,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'ラップ ${lapTime.lapNumber}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              Text(
+                                formattedTime,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.orange.shade700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            const SizedBox(height: 20),
 
             // ステータス表示
             Container(
