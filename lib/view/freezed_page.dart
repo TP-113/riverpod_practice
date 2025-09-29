@@ -18,7 +18,10 @@ class _FreezedPageState extends ConsumerState<FreezedPage> {
   void initState() {
     super.initState();
     // 練習問題：Freezed 4 - フォームの初期値に現在の情報を挿入
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // ローカルストレージからユーザー情報を読み込む
+      await ref.read(userControllerProvider.notifier).loadUserFromStorage();
+
       final user = ref.read(userControllerProvider);
       setState(() {
         _nameController.text = user.name;
@@ -135,13 +138,14 @@ class _FreezedPageState extends ConsumerState<FreezedPage> {
                         Text(
                           _selectedBirthDate != null
                               ? DateFormat(
-                                  'yyyy年MM月dd日',
-                                ).format(_selectedBirthDate!)
+                                'yyyy年MM月dd日',
+                              ).format(_selectedBirthDate!)
                               : '生年月日を選択してください',
                           style: TextStyle(
-                            color: _selectedBirthDate != null
-                                ? Colors.black
-                                : Colors.grey.shade600,
+                            color:
+                                _selectedBirthDate != null
+                                    ? Colors.black
+                                    : Colors.grey.shade600,
                           ),
                         ),
                       ],
