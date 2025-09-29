@@ -135,13 +135,14 @@ class _FreezedPageState extends ConsumerState<FreezedPage> {
                         Text(
                           _selectedBirthDate != null
                               ? DateFormat(
-                                  'yyyy年MM月dd日',
-                                ).format(_selectedBirthDate!)
+                                'yyyy年MM月dd日',
+                              ).format(_selectedBirthDate!)
                               : '生年月日を選択してください',
                           style: TextStyle(
-                            color: _selectedBirthDate != null
-                                ? Colors.black
-                                : Colors.grey.shade600,
+                            color:
+                                _selectedBirthDate != null
+                                    ? Colors.black
+                                    : Colors.grey.shade600,
                           ),
                         ),
                       ],
