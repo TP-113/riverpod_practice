@@ -13,9 +13,8 @@ String _$myNumberHash() => r'd7bb48028fd9182bb248da4c238fb277f371ae07';
 final myNumberProvider = AutoDisposeProvider<int>.internal(
   myNumber,
   name: r'myNumberProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$myNumberHash,
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$myNumberHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
