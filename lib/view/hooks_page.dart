@@ -68,14 +68,16 @@ class HooksPage extends HookWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(32),
               decoration: BoxDecoration(
-                color: isRunning.value
-                    ? Colors.green.shade50
-                    : Colors.blue.shade50,
+                color:
+                    isRunning.value
+                        ? Colors.green.shade50
+                        : Colors.blue.shade50,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: isRunning.value
-                      ? Colors.green.shade300
-                      : Colors.blue.shade300,
+                  color:
+                      isRunning.value
+                          ? Colors.green.shade300
+                          : Colors.blue.shade300,
                   width: 2,
                 ),
               ),
@@ -85,9 +87,10 @@ class HooksPage extends HookWidget {
                     '経過時間',
                     style: TextStyle(
                       fontSize: 18,
-                      color: isRunning.value
-                          ? Colors.green.shade700
-                          : Colors.blue.shade700,
+                      color:
+                          isRunning.value
+                              ? Colors.green.shade700
+                              : Colors.blue.shade700,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -97,9 +100,10 @@ class HooksPage extends HookWidget {
                     style: TextStyle(
                       fontSize: 64,
                       fontWeight: FontWeight.bold,
-                      color: isRunning.value
-                          ? Colors.green.shade800
-                          : Colors.blue.shade800,
+                      color:
+                          isRunning.value
+                              ? Colors.green.shade800
+                              : Colors.blue.shade800,
                     ),
                   ),
                 ],
@@ -118,9 +122,8 @@ class HooksPage extends HookWidget {
                 ElevatedButton(
                   onPressed: toggleTimer,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isRunning.value
-                        ? Colors.red
-                        : Colors.green,
+                    backgroundColor:
+                        isRunning.value ? Colors.red : Colors.green,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
@@ -186,9 +189,10 @@ class HooksPage extends HookWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: isRunning.value
-                    ? Colors.green.shade100
-                    : Colors.grey.shade100,
+                color:
+                    isRunning.value
+                        ? Colors.green.shade100
+                        : Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Row(
@@ -206,9 +210,10 @@ class HooksPage extends HookWidget {
                   Text(
                     isRunning.value ? '実行中' : '停止中',
                     style: TextStyle(
-                      color: isRunning.value
-                          ? Colors.green.shade700
-                          : Colors.grey.shade700,
+                      color:
+                          isRunning.value
+                              ? Colors.green.shade700
+                              : Colors.grey.shade700,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
